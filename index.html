@@ -141,6 +141,8 @@ button:hover{filter:brightness(1.25)}
 .chips.g span{background:#16351f;border-color:#4fd16f}.chips span.no{background:none;border-color:var(--line);color:var(--mut)}.chips small{color:var(--mut);font-size:14px}
 .gcnt{text-align:center;padding:3px 14px;border:1px solid #ffd24a;border-radius:8px;background:#161829}.gcnt small{display:block;color:var(--mut);font-weight:700;font-size:13px}.gcnt b{font:400 28px 'Anton',Impact,sans-serif;color:#ffd24a;line-height:1}
 .tile.nf:not(.sel){border-color:#ff5a64;box-shadow:0 0 10px #ff5a6488}
+.cred{position:relative;z-index:1;text-align:center;padding:8px 0 calc(34px + env(safe-area-inset-bottom,0px));color:var(--mut);font-weight:700}.cred b{color:var(--ink)}
+.lbtn{position:fixed;z-index:5;top:calc(12px + env(safe-area-inset-top,0px));right:14px;padding:5px 14px;border-radius:20px;background:var(--pan);border:1px solid var(--line);color:var(--ink);font:700 16px 'Barlow Condensed',sans-serif;cursor:pointer}
 .ft{width:100%;border-collapse:collapse;font-size:16px}.ft th,.ft td{padding:6px 8px;border:1px solid var(--line);text-align:center}.ft th{color:var(--mut);font-size:14px}.ft td:first-child{text-align:left;font-weight:700}.ft .tt td{background:#1d2033;font-weight:700}
 .fh{margin:14px 0 6px;font:400 24px 'Anton',Impact,sans-serif;font-style:italic}
 .rrb{margin-top:6px;padding:4px 10px;border:1px solid #ffd24a;border-radius:5px;background:#161829;color:var(--ink);cursor:pointer;font-weight:700}
@@ -152,6 +154,8 @@ button:hover{filter:brightness(1.25)}
 <main id="nz" hidden><h1>Modo Nuzlocke</h1><p class="sb">Cada jugador y cada rol tiene su propio Nuzlocke</p>
 <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;align-items:center;margin-top:12px"><button id="nzreset" class="pick" style="width:auto">🔄 Reiniciar Nuzlocke</button><button id="nzfin" class="pick" style="width:auto">🏁 Finalizar</button></div>
 <div id="nzpl" style="margin-top:18px"></div><div style="text-align:center"><button id="nzadd" class="add" aria-label="Añadir jugador">+</button></div></main>
+<button id="lbtn" class="lbtn" aria-label="Cambiar idioma">🌐 English</button>
+<footer class="cred">Hecha por <b>@SyltrTao</b></footer>
 <div id="nzc" hidden><div class="box" role="alertdialog"><p id="nzcm" style="font-size:20px;margin:0 0 16px"></p><div style="display:flex;gap:10px;justify-content:center"><button id="nzcy" class="pick" style="width:auto;padding:9px 20px"></button><button id="nzcn" class="pick" style="width:auto;padding:9px 20px;border-color:var(--line);background:#161829;box-shadow:none">Cancelar</button></div></div></div>
 <div id="nzf" hidden><div class="box" role="dialog" aria-label="Resumen final"><h2 style="margin:0 0 6px;font:400 28px 'Anton',Impact,sans-serif;font-style:italic">Resumen final del Nuzlocke</h2><div id="nzfb"></div><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px"><button id="nzfk" class="pick" style="width:auto;padding:9px 20px">Seguir jugando</button><button id="nzfr" class="pick" style="width:auto;padding:9px 20px;border-color:#ff5a64;background:#3a1b24;box-shadow:none">Reiniciar Nuzlocke</button></div></div></div>
 <div id="nzr" hidden><div class="box"><div id="nzt"></div><div id="nzval"></div><p id="nzd"></p><button id="nzok" class="pick">Continuar</button></div></div>
@@ -175,7 +179,7 @@ button:hover{filter:brightness(1.25)}
 <li class="warn"><b>¡Nuevo modo de juego: Nuzlocke!</b></li>
 <li><b>Cambia de modo.</b> Usa la barra de la izquierda para ir entre Randomizer y Nuzlocke.</li>
 <li><b>Sobrevive con tu plantilla.</b> Si pierdes, el héroe que usaste muere y no vuelve... a menos que consigas rachas, buffs o llegues a 5 caídos. Cada jugador lleva su propio Nuzlocke por cada rol.</li>
-<li><b>Buffs y debuffs.</b> 8 ventajas y 8 desventajas que salen de ruletas.</li>
+<li><b>Buffs y debuffs.</b> 8 ventajas y 7 desventajas que salen de ruletas.</li>
 <li><b>Mide cuánto aguantas.</b> Contador de partidas sobrevividas y botón Finalizar con tu resumen.</li>
 <li><b>Ayuda según el modo.</b> El botón ? muestra las reglas del modo en que estés.</li></ul></div></div>
 <div id="toast" role="status"></div>
@@ -512,8 +516,118 @@ li('⚠️ Debuffs.',DEB.map(d=>`<br>${ic(d.id)} <b>${d.t}</b> <i>(${SEV[d.id]==
 li('🛡️ Buffs.',BUF.map(b=>`<br>${ic(b.id)} <b>${b.t}:</b> ${b.d}`).join('')),
 li('Qué controla la app.','Puntos, rachas, caídos, buffs, debuffs y las ruletas. Las restricciones de juego (Punto ciego, Mute de ultimate, etc.) las respetan los jugadores.')].join('');
 const HRZ=$('#hlist').innerHTML,HRZT=$('#hh').textContent;
-function helpOpen(){const z=curMode==='nz';$('#hlist').innerHTML=z?HNZ:HRZ;$('#hh').textContent=z?'Reglas del Nuzlocke':HRZT;$('#help').hidden=false;$('#hclose').focus()}
+function helpOpen(){const z=curMode==='nz',en=lang==='en';$('#hlist').innerHTML=z?(en?HNZ_EN:HNZ):(en?HRZ_EN:HRZ);$('#hh').textContent=z?'Reglas del Nuzlocke':HRZT;$('#help').hidden=false;$('#hclose').focus()}
 // Cambio de modo (sidebar)
 function mode(m){curMode=m;$('#rz').hidden=m!=='rz';$('#nz').hidden=m!=='nz';$('#brz').classList.toggle('on',m==='rz');$('#bnz').classList.toggle('on',m==='nz');if(m==='nz')nzRender()}
 $('#brz').onclick=()=>mode('rz');$('#bnz').onclick=()=>mode('nz');mode('rz');
+/* ===== IDIOMA ES/EN: diccionario + observador del DOM (se guarda el español original para poder volver) ===== */
+const DEBEN={blind:['Blind spot','Banned from picking Hitscan heroes (or projectile heroes, as indicated).'],
+offult:['Offensive ultimates only','You may only use your ultimates offensively.'],
+clumsy:['Clumsy hand','You must play heroes with fewer hours played.'],
+slow:['Slow heroes','Banned from heroes with high-mobility or verticality abilities.'],
+mute:['Ultimate mute','You can only use your ultimate if a teammate uses theirs first.'],
+fall:['Fall penalty','If you die first in a team fight, switch heroes when you respawn or subtract 1 extra life from the character.'],
+poison:['Point poison','If you lose the game, your next win will not count toward your win counter.']};
+const BUFEN={res:['Resurrection shield','If you lose, your current hero does not die.'],
+life:['Life insurance','If you lose but get POTG or top damage/healing of the lobby, the hero is saved.'],
+fen:['Phoenix','With a Perfect (0 deaths), revive 1 eliminated hero of this role.'],
+amo:['Cushion','If you lose, the defeat is absorbed by a random unused hero from your roster.'],
+luz:['Green light','Cancels the next debuff as soon as it is activated.'],
+desc:['Defeat discount','If you lose but get the most kills in the lobby, the hero is left wounded instead of dying.'],
+acel:['Goal accelerator','Winning with 0 deaths counts as 2 wins.'],
+reroll:['Change of luck','Discard an assigned debuff and swap it for a random one.']};
+const EN={'Randomizer de equipos':'Team randomizer','Overwatch: tira, banea y arma tu escuadra':'Overwatch: roll, ban and build your squad','Tirar equipo completo':'Roll the whole team',
+'Listo':'Done','Toca un héroe para marcarlo favorito (hasta 5, #1 sale más seguido). Usa la ✕ para banearlo (hasta 3).':'Tap a hero to mark it as a favorite (up to 5, #1 shows up more often). Use ✕ to ban it (up to 3).',
+'Cómo se juega':'How to play','Reglas del Nuzlocke':'Nuzlocke rules','Cerrar':'Close','Entendido':'Got it','Beta versión 0.5':'Beta version 0.5','versión 0.5':'version 0.5',
+'Si te está gustando la página puedes seguirme, arigato':'If you are enjoying the page you can follow me, arigato',
+'Modo Nuzlocke':'Nuzlocke mode','Cada jugador y cada rol tiene su propio Nuzlocke':'Every player and every role has its own Nuzlocke',
+'🔄 Reiniciar Nuzlocke':'🔄 Restart Nuzlocke','Reiniciar Nuzlocke':'Restart Nuzlocke','🏁 Finalizar':'🏁 Finish','Hecha por':'Made by',
+'Continuar':'Continue','Cancelar':'Cancel','Aceptar':'OK','Sí, reiniciar':'Yes, restart','Resumen final del Nuzlocke':'Final Nuzlocke summary','Seguir jugando':'Keep playing',
+'¿Seguro que deseas borrar el progreso y revivir a todos los héroes?':'Are you sure you want to erase progress and revive all heroes?',
+'Sin tirada':'No roll yet','TIRAR':'ROLL','Escoge tu preferido':'Choose your favorites','Nombre':'Name','Nombre del jugador':'Player name','Eliminar jugador':'Remove player','Quitar jugador':'Remove player','Añadir jugador':'Add player',
+'Reglas y tutorial':'Rules and tutorial','Redes de syltrtao':"syltrtao's socials",'Modos de juego':'Game modes','Novedades de la versión 0.5':"What's new in version 0.5",'Cambiar idioma':'Change language','Resumen final':'Final summary',
+'Difícil':'Hard','Medio-Difícil':'Medium-Hard','Medio':'Medium','Medio-Fácil':'Medium-Easy','Fácil':'Easy','¿Estás jugando?':'Are you even playing?','Híbrido Tank':'Hybrid Tank',
+'Quita el baneo primero':'Remove the ban first','Máximo 5 favoritos':'Max 5 favorites','Máximo 3 baneos':'Max 3 bans','No quedan héroes disponibles para este rol':'No heroes left for this role',
+'Partidas sobrevividas':'Games survived','Victorias, derrotas y partidas nulas cuentan como una partida':'Wins, defeats and void games each count as one game',
+'GAME OVER: no quedan héroes en este rol':'GAME OVER: no heroes left in this role','Victorias':'Wins','Derrotas':'Defeats','Partidas':'Games','Héroes perdidos':'Heroes lost','Héroes salvados':'Heroes saved',
+'Racha actual':'Current streak','Sin racha':'No streak','Emergencia (derrotas)':'Emergency (defeats)','Debuffs activos':'Active debuffs','Ninguno':'None','🎲 Cambio de dicha':'🎲 Change of luck',
+'Usé 2 o más héroes en la partida (counter-swap)':'I used 2+ heroes this game (counter-swap)','Muertes':'Deaths','0 muertes':'0 deaths','Menos de 8':'Fewer than 8','Más de 8':'More than 8',
+'Top daño/curación':'Top damage/healing','Diff':'Diff','Negativo':'Negative',
+'Solo en derrotas: el rival te dobla en kills o su DPS hizo más del doble de tu daño':'Defeats only: the enemy doubled your kills or their DPS did more than double your damage',
+'Más muertes que kills (ej. 3/8) o menos de 3.000 de daño/curación en una partida completa':'More deaths than kills (e.g. 3/8) or under 3,000 damage/healing in a full game',
+'🏆 ¡VICTORIA!':'🏆 VICTORY!','❌ DERROTA':'❌ DEFEAT','⚠️ PARTIDA NULA':'⚠️ VOID GAME','El Cementerio':'The Graveyard','Nadie ha caído... todavía':'Nobody has fallen... yet',
+'Ruleta rusa: más de 8 muertes (50/50)':'Russian roulette: more than 8 deaths (50/50)','Fénix: ¡un héroe regresa!':'Phoenix: a hero returns!','Cambio de dicha':'Change of luck','¿Quién cae?':'Who falls?',
+'Ruleta de resurrección (3 victorias)':'Resurrection roulette (3 wins)','Resurrección de emergencia (5 caídos)':'Emergency resurrection (5 fallen)',
+'Racha de 2 victorias':'2-win streak','Racha de dominio (6 victorias)':'Domination streak (6 wins)','Derrota humillante (diff)':'Humiliating defeat (diff)','Mal desempeño individual (negativo)':'Poor individual performance (negative)',
+'Líder estadístico':'Stat leader','Misericordia (3 derrotas)':'Mercy (3 losses)','🟢 El héroe sobrevive':'🟢 The hero survives','Te salvas esta vez':'You are spared this time',
+'☠️ Héroe eliminado':'☠️ Hero eliminated','Pierdes al héroe aunque ganaste':'You lose the hero even though you won','Regresa sin penalización':'Returns with no penalty',
+'Elige el héroe que jugaste':'Pick the hero you played','Marca al menos 2 héroes usados':'Mark at least 2 heroes used','Partida nula: nadie pierde nada':'Void game: nobody loses anything',
+'Acelerador de metas: cuenta como 2 victorias':'Goal accelerator: counts as 2 wins','Luz verde anuló el debuff':'Green light cancelled the debuff','No hay caídos: +1 Escudo de resurrección':'No fallen heroes: +1 Resurrection shield',
+'Diff solo cuenta en derrotas':'Diff only counts in defeats','Nuzlocke reiniciado: todo listo para una partida nueva':'Nuzlocke restarted: ready for a new run','Descuento de derrota (queda herido)':'Defeat discount (left wounded)'};
+DEB.forEach(d=>{EN[d.t]=DEBEN[d.id][0];EN[d.d]=DEBEN[d.id][1]});BUF.forEach(b=>{EN[b.t]=BUFEN[b.id][0];EN[b.d]=BUFEN[b.id][1]});
+const RX=[[/^Jugador (\d+)$/,(m,a)=>'Player '+a],
+[/^Escoge tu preferido(.*)$/s,(m,a)=>'Choose your favorites'+a],
+[/^Favoritos (\d+)\/5 · Baneados (\d+)\/3$/,(m,a,b)=>`Favorites ${a}/5 · Banned ${b}/3`],
+[/^Banear (.+)$/,(m,a)=>'Ban '+a],
+[/^Máximo (\d+) (\w+): esta ficha pasó a (\w+)$/,(m,a,b,c)=>`Max ${a} ${b}: this card switched to ${c}`],
+[/^Ruleta de debuffs: (.+)$/,(m,a)=>'Debuff roulette: '+tx(a)],
+[/^¡Buff ganado! (.+)$/,(m,a)=>'Buff won! '+tx(a)],
+[/^Regresa con debuff: (.+?) - (.+)$/,(m,a,b)=>'Returns with debuff: '+tx(a)+' - '+tx(b)],
+[/^Regreso de (.+?): (.+)$/,(m,a,b)=>`Return of ${a}: `+tx(b)],
+[/^Amortiguador: cae (.+) en su lugar$/,(m,a)=>`Cushion: ${a} falls instead`],
+[/^(.+) se salva: (.+)$/,(m,a,b)=>`${a} is saved: `+tx(b)],
+[/^([:•.,]\s*)(.+)$/s,(m,a,b)=>a+tx(b)]];
+let lang='es';try{lang=localStorage.getItem('ow_lang')||((navigator.language||'').startsWith('en')?'en':'es')}catch(e){}
+function tx(s){if(lang!=='en')return s;const m=s.match(/^(\s*)([\s\S]*?)(\s*)$/),k=m[2];
+if(EN[k]!==undefined)return m[1]+EN[k]+m[3];
+for(const[r,f]of RX){const x=k.match(r);if(x)return m[1]+f(...x)+m[3]}return s}
+const orig=new WeakMap(),oattr=new WeakMap(),ATT=['placeholder','title','aria-label'];
+function tn(n){const cur=n.nodeValue;let o=orig.get(n);if(o===undefined&&lang!=='en')return;
+if(o===undefined||(cur!==o&&cur!==tx(o)))o=cur;orig.set(n,o);const v=tx(o);if(v!==cur)n.nodeValue=v}
+function ta(e){for(const a of ATT){if(!e.hasAttribute(a))continue;const cur=e.getAttribute(a),m=oattr.get(e)||{};let o=m[a];
+if(o===undefined&&lang!=='en')continue;if(o===undefined||(cur!==o&&cur!==tx(o)))o=cur;m[a]=o;oattr.set(e,m);const v=tx(o);if(v!==cur)e.setAttribute(a,v)}}
+const skip=e=>/^(SCRIPT|STYLE)$/.test(e.nodeName);
+function sweep(root){if(root.nodeType===3){if(!skip(root.parentNode))tn(root);return}
+if(root.nodeType!==1||skip(root))return;ta(root);const w=document.createTreeWalker(root,5);let n;
+while(n=w.nextNode()){if(n.nodeType===3){if(!skip(n.parentNode))tn(n)}else if(!skip(n))ta(n)}}
+new MutationObserver(rs=>{if(lang!=='en')return;for(const r of rs){
+if(r.type==='childList')r.addedNodes.forEach(sweep);else if(r.type==='characterData')tn(r.target);else ta(r.target)}})
+.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:ATT});
+// Textos largos con HTML propio (ayuda y novedades) en inglés
+const HRZ_EN=`<li class="warn"><b>Play this in quickplay to practice, do not troll my ranks! At your own risk.</b></li>
+<li><b>Players.</b> You start with 1 card. The + button adds up to 5, and the − on each card (except the central one) removes it. Type the name at the top of each card.</li>
+<li><b>Roles.</b> TANK, DPS and SUPPORT only pick the role, they do not roll. The roll is made with the ROLL button on each card. Roll the whole team rolls everyone at once.</li>
+<li><b>If nobody picks a role.</b> All cards start as DPS. With 5 players all in the same role, Roll the whole team randomly deals 1 tank, 2 DPS and 2 supports. With fewer than 5, each card rolls with the role it has. The team has limits: at most 1 tank, 2 DPS and 2 supports. If more players share a role, the extra ones are randomly moved to a role with room.</li>
+<li><b>Favorites (up to 5).</b> In Choose your favorites, tap the heroes you want to play most. #1 is the most likely to show up, then #2, #3, #4 and #5. It is not a guarantee: just more chance. Together your favorites add up to at most 50% probability.</li>
+<li><b>Bans (up to 3).</b> With the ✕ you block heroes you do not want to play. A banned hero never shows up in that player's roll. Favorites and bans are saved per card and per role.</li>
+<li><b>No repeats.</b> If a hero shows up on one card, it does not appear on any other card of the team, neither as main nor as reserve. And on the same card, the main hero you got is not repeated as main on the next roll.</li>
+<li><b>What you play.</b> You have to play the main hero, the big one on the card. If the enemy counters you and you really need to switch mid-game, you may move to one of the two reserves in the bottom corners. Only those two options.</li>
+<li><b>No going back.</b> Before thinking about a switch, you must die at least 3 times with your hero. When you switch from the main hero to one of the two reserves, you cannot return to the previous one. If you reach the third hero, you cannot go back to the other two you already used. Think carefully before switching.</li>
+<li><b>Difficulty.</b> The badge at the top right shows how hard the hero you got is, from Tryhard to Are you even playing? Careful: difficulty is very subjective and may change in future versions.</li>`;
+const HNZ_EN=[
+li('Fact sheet.','Manage your roster by role and win as many games as you can without running out of heroes. There is no goal: the Nuzlocke lasts until you run out of heroes or decide to restart it, and Finish shows your summary. Every player and every role (Tank, DPS, Support) has its own 100% independent Nuzlocke: heroes, buffs and wins are not shared. The Games survived counter adds every game: a win, a defeat or a void game all count the same.'),
+li('How to play.','Pick the role and the hero you will use (fallen heroes are locked). When the game ends, log your deaths (0, fewer than 8 or more than 8), POTG and lobby tops, then press Victory, Defeat or Void game. If you lose, the hero you used dies unless a buff saves it. Russian roulette: if you win but finish with more than 8 deaths, a 50/50 roulette decides whether the hero survives or falls anyway. If you used 2 or more heroes (counter-swap), tick the box and a roulette decides who falls.'),
+li('Game Over.','If a role runs out of living heroes, the Nuzlocke of that role ends for that player. It does not affect other players or roles, and nothing is transferred between them.'),
+li('Void game.','If there is an AFK or early leaver, trolling (feeding, sabotage), confirmed cheaters or the game is cancelled, press Void game: nobody loses lives, dies or gets penalized.'),
+li('How you earn a buff.','Winning with 0 deaths (Perfect), getting POTG or leading the lobby in damage, healing or kills. Also through Mercy: 3 losses in a row grant a buff to break the streak. The buff comes from a roulette.'),
+li('How you get a debuff.','Each one comes from a roulette for the next round:<br>• <b>2-win streak.</b><br>• <b>Domination streak:</b> 6 wins in a row.<br>• <b>Diff (humiliating defeat):</b> you lose and the enemy doubles your kills, or their DPS did more than double your damage.<br>• <b>Negative (poor performance):</b> you finish with more deaths than kills (e.g. 3/8) or under 3,000 damage/healing in a full game.<br>• <b>Return of a fallen hero:</b> the revived hero comes back with a debuff (light with 3 wins, strong with 5 fallen).<br>Several can stack. Green light cancels the next one that activates.'),
+li('Resurrections.','With 3 wins in a row, a roulette revives a fallen hero with a light debuff in their first game back (if nobody has fallen, you gain a Resurrection shield). Every fallen hero adds to the emergency counter: at 5 one is revived with a strong debuff and the counter returns to 0 / 5. Heroes with a pending debuff are marked in red on the grid.'),
+li('⚠️ Debuffs.',DEB.map(d=>`<br>${ic(d.id)} <b>${EN[d.t]}</b> <i>(${SEV[d.id]===2?'strong':'light'})</i>: ${EN[d.d]}`).join('')),
+li('🛡️ Buffs.',BUF.map(b=>`<br>${ic(b.id)} <b>${EN[b.t]}</b>: ${EN[b.d]}`).join('')),
+li('What the app handles.','Points, streaks, fallen heroes, buffs, debuffs and the roulettes. Play restrictions (Blind spot, Ultimate mute, etc.) are respected by the players.')].join('');
+const NEWS_ES=$('#news ul').innerHTML;
+const NEWS_EN=`<li class="warn"><b>New game mode: Nuzlocke!</b></li>
+<li><b>Switch modes.</b> Use the left bar to go between Randomizer and Nuzlocke.</li>
+<li><b>Survive with your roster.</b> If you lose, the hero you used dies and does not come back... unless you get streaks, buffs or reach 5 fallen. Every player has their own Nuzlocke for each role.</li>
+<li><b>Buffs and debuffs.</b> 8 perks and 7 drawbacks that come from roulettes.</li>
+<li><b>Measure how long you last.</b> Games survived counter and a Finish button with your summary.</li>
+<li><b>Help by mode.</b> The ? button shows the rules of the mode you are in.</li>`;
+function setLang(l){lang=l;try{localStorage.setItem('ow_lang',l)}catch(e){}
+document.documentElement.lang=l;document.title=l==='en'?'Team randomizer - Overwatch':'Randomizer de equipos - Overwatch';
+$('#lbtn').textContent=l==='en'?'🌐 Español':'🌐 English';
+$('#news ul').innerHTML=l==='en'?NEWS_EN:NEWS_ES;
+if(!$('#help').hidden)helpOpen();
+sweep(document.body)}
+$('#lbtn').onclick=()=>setLang(lang==='en'?'es':'en');
+if(lang==='en')setLang('en');
 </script></body></html>
